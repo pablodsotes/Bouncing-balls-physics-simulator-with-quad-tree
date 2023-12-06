@@ -30,21 +30,12 @@ class Wbf:
         end = start
         balls = game.balls_dict
         # 8x8
-        matrix = [
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-            [[], [], [], [], [], [], [], []],
-        ]
+        matrix = [[[]for _ in range(8)] for _ in range(8)]
 
         # while time is under screen refresh time do the work
         while (end - start) < (1 / 60):
 
-            
+
             self.dt = time.perf_counter()  - self.time
             self.time = time.perf_counter()
             if self.pause_flag:
