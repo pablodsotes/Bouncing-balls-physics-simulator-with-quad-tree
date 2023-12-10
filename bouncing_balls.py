@@ -45,6 +45,7 @@ class Game:
             self.screen.draw_balls(self)
             self.screen.draw_mouse(self)
             pygame.display.update()
+            print(self.ball_count, self.c)
 
 class Settings:
     """All the settings"""
