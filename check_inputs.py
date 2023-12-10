@@ -42,6 +42,7 @@ class ChIn:
             self.create_object("showing")
         if event.button == 3 and not pygame.key.get_pressed()[pygame.K_LSHIFT]:
             self.create_object("grab")
+            self.actions("deselect")
         if event.button == 3 and pygame.key.get_pressed()[pygame.K_LSHIFT] and\
             not game.wbf.select_flag:
             self.create_object("select")
@@ -145,6 +146,10 @@ class ChIn:
                     else:
                         game.balls_dict[key].selected = True
                         game.balls_dict[key].color =pygame.Color((70,70,70,255))
+            case "deselect":
+                for key in game.balls_dict.copy().keys():
+                    if not key == 0:
+                        game.balls_dict[key].selected = False
             case "loose":
                 game.wbf.grab_flag = False
                 game.balls_dict.pop(0)
