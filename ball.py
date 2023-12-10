@@ -18,7 +18,7 @@ class Ball():
         self.selected = False
         self.color = pygame.Color(255,0,0,255)
         if self.mode == "key":
-            self.radius = 10
+            self.radius = 5
             self.p = np.array((30,30), dtype=np.float64)
             self.v = np.array((100,100), dtype=np.float64)
         else:

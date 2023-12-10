@@ -46,10 +46,9 @@ def bounce_velocities(ball1, ball2, game):
                   (ball1.radius + ball2.radius))
     # move away balls
     if not ball1.grabed:
-        ball1.p -= 0.5 * overlap * vc * ball2.mass / (ball1.mass + ball2.mass)
+        ball1.p -= overlap * vc * ball2.mass / (ball1.mass + ball2.mass)
     if not ball2.grabed:
-        ball2.p += 0.5 * overlap * vc * ball1.mass / (ball2.mass + ball1.mass)
-
+        ball2.p += overlap * vc * ball1.mass / (ball2.mass + ball1.mass)
 
 def wall_bounce(ball, game):
     """if bounce at a wall ,changes ball velocity and push the ball in"""
@@ -109,8 +108,7 @@ def attraction(ball,game) -> np.array:
                     dtype=np.float64,
                 )
 
-
-                #start velocity to achive that balls orbite
+                # start velocity to achive balls orbite
             if ball.mode == "orbite" and (att[0] != 0 or att[1] != 0):
                 # v = sqrt(a*r)*(perpendicular to 'a' versor)
                 ball.v = np.array(np.sqrt(np.linalg.norm(att) *\

@@ -17,6 +17,7 @@ class Screen:
         self.trace_image.fill(game.settings.background_color)
         self.trace_color = pygame.Color(0,0,0,255)
         self.trace_flag = False
+        self.grid = []
 
     def draw_balls(self,game):
         """draw balls"""
@@ -30,9 +31,10 @@ class Screen:
     def draw_grid(self):
         """draw grid"""
 
-        for i in range(1, 8):
-            pygame.draw.line(self.image, WHITE,(0, i * 100), (800, i * 100))
-            pygame.draw.line(self.image, WHITE,(i * 100, 0), (i * 100, 800))
+        for i in self.grid:
+            pygame.draw.line(self.image, (255, 255, 255), i[0], i[1])
+        self.grid.clear()
+
 
     def draw_mouse(self,game):
         """draw mouse frame"""

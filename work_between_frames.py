@@ -2,7 +2,7 @@
 
 import time
 import numpy as np
-from searching_for_overlaps import sweep_matrix, fill_matrix
+from searching_for_overlaps import sweep_kdtree, fill_kdtree
 from apply_physics import attraction, mass_center
 
 
@@ -21,6 +21,7 @@ class Wbf:
         self.energy_loss_flag = False
         self.select_flag = False
         self.pause_flag = False
+        self.store_grid_flag = True  # store grid just first time
 
     def work(self,game):
         """do physics, check for collitions,make gravity,change velocities"""
@@ -29,27 +30,33 @@ class Wbf:
         start = time.perf_counter()
         end = start
         balls = game.balls_dict
-        # 8x8
-        matrix = [[[]for _ in range(8)] for _ in range(8)]
 
         # while time is under screen refresh time do the work
+        self.store_grid_flag = True
         while (end - start) < (1 / 60):
 
-
+            s = time.perf_counter()
             self.dt = time.perf_counter()  - self.time
             self.time = time.perf_counter()
+
             if self.pause_flag:
                 self.dt = 0
-
-            s = time.perf_counter()
-            fill_matrix(matrix, balls, game)
-            sweep_matrix(matrix,balls,game,self)
-            self.mass_center = mass_center(balls)
+            # move balls
             for ball in balls.values():
                 if str(type(ball)) != "<class 'mouse.Mouse'>":
                     ball.update(self)
-                    if self.attraction_flag:
+            # check kdtree for overlaps and bounces
+            kdtree_cells = []
+            fill_kdtree(balls.keys(), game, kdtree_cells, self.store_grid_flag)
+            self.store_grid_flag = False
+            sweep_kdtree(kdtree_cells, balls, game, self)
+            # update attraction of each ball
+            self.mass_center = mass_center(balls)
+            if self.attraction_flag:
+                for ball in balls.values():
+                    if str(type(ball)) != "<class 'mouse.Mouse'>":
                         ball.att = attraction(ball,game)
+            # move balls according to attraction
             if self.attraction_flag or self.gravity_flag:
                 for ball in balls.values():
                     if str(type(ball)) != "<class 'mouse.Mouse'>":

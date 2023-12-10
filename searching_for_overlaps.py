@@ -4,80 +4,122 @@ import numpy as np
 from apply_physics import wall_bounce, grab, bounce_velocities
 
 
-def fill_matrix(matrix, balls, game):
-    """fill matrix with ball numbers inside each cell"""
-
-    sw = game.settings.screen_width
-    sh = game.settings.screen_height
-
-    # clear the matrix
-    for row in matrix:
-        for lst in row:
-            lst.clear()
-
-    for nr, ball in balls.items():
-        # asign ball to its cell/s on matrix
-        l = grid(ball.rect.left, sw)
-        r = grid(ball.rect.right, sw)
-        t = grid(ball.rect.top, sh)
-        b = grid(ball.rect.bottom, sh)
-        # for all the cell the ball encompass
-        for i in range(t, b + 1):
-            for j in range(l, r + 1):
-                matrix[i][j].append(nr)
+def fill_kdtree(ball_keys, game, groups, store_grid_flag):
+    """fills kdtree groups"""
+    center = (game.settings.screen_width/2, game.settings.screen_height/2)
+    Node(center, 1, ball_keys, game, groups, store_grid_flag)
 
 
-def grid(edge, size):
-    """compares each ball edge with lines of the grid"""
+class Node:
+    """a node with a center an a list of ball keys inside it"""
 
-    if edge > size / 2:
-        if edge >= 3 * size / 4:
-            if edge > 7 * size / 8:
-                return 7
-            return 6
-        if edge >= 5 * size / 8:
-            return 5
-        return 4
-    if edge >= size / 4:
-        if edge >= 3 * size / 8:
-            return 3
+    def __init__(self, center, depth, ball_keys, game, groups, store_grid_flag) -> None:
+        self.center = center
+        self.depth = depth
+        self.size = game.settings.screen_width/(2**depth)
+        self.cells = [[], [], [], []]
+        self.ball_keys = ball_keys
+        self.divide(game, groups, store_grid_flag)
+        if store_grid_flag:
+            self.store_grid(game)
+
+    def divide(self, game, groups, store_grid_flag):
+        """divide cell if it correspond"""
+        balls = game.balls_dict
+        for k in self.ball_keys:
+            # asign ball to its/their cell/s
+            # evaluate each of 4 corners of the ball rect
+            lt = split_in_4(balls[k].rect.left, balls[k].rect.top, self.center)
+            rt = split_in_4(balls[k].rect.right,
+                            balls[k].rect.top, self.center)
+            lb = split_in_4(balls[k].rect.left,
+                            balls[k].rect.bottom, self.center)
+            rb = split_in_4(balls[k].rect.right,
+                            balls[k].rect.bottom, self.center)
+            # if any corner of ball's rect is in the cell,append ball
+            if lt == 0 or rt == 0 or lb == 0 or rb == 0:
+                self.cells[0].append(k)
+            if lt == 1 or rt == 1 or lb == 1 or rb == 1:
+                self.cells[1].append(k)
+            if lt == 2 or rt == 2 or lb == 2 or rb == 2:
+                self.cells[2].append(k)
+            if lt == 3 or rt == 3 or lb == 3 or rb == 3:
+                self.cells[3].append(k)
+
+        for i in range(4):
+            # if cell is short or prof is big don't divide again
+            if len(self.cells[i]) in range(1, 10) or self.depth > 7:
+                # save cell as it is
+                groups.append(self.cells[i])
+                continue
+            # new center
+            if len(self.cells[i]) == 0:
+                continue
+            if i in (0, 2):
+                x = self.center[0]-self.size/2
+            if i in (1, 3):
+                x = self.center[0]+self.size/2
+            if i in (0, 1):
+                y = self.center[1]-self.size/2
+            if i in (2, 3):
+                y = self.center[1]+self.size/2
+            # create new node with new center and +1 prof
+            Node((x, y), self.depth+1,
+                 self.cells[i], game, groups, store_grid_flag)
+
+    def store_grid(self, game):
+        """add each cross to be drawn later"""
+
+        a = (self.center[0]-self.size, self.center[1])
+        b = (self.center[0]+self.size, self.center[1])
+        c = (self.center[0], self.center[1]-self.size)
+        d = (self.center[0], self.center[1]+self.size)
+
+        game.screen.grid.append([a, b])
+        game.screen.grid.append([c, d])
+
+
+def split_in_4(bx, by, center):
+    """to what of 4 qudrants points belong"""
+
+    x = center[0]
+    y = center[1]
+    if bx <= x:
+        if by <= y:
+            return 0
         return 2
-    if edge >= size / 8:
+    if by <= y:
         return 1
-    return 0
+    return 3
 
 
-def sweep_matrix(matrix, balls, game,wbf):
+def sweep_kdtree(kdtree_cells, balls, game, wbf):
     """check for collitions for each cell in the matrix"""
 
     already_checked = set()
     wbf.preselected = set()
-    # sweep 64 cells
-    for i in range(0, 8):
-        for j in range(0, 8):
-            for n in range(len(matrix[i][j])):
-                # for each ball key and for the other ball keys
-                k1 = matrix[i][j][n]
-                for m in range(n + 1, len(matrix[i][j])):
-                    k2 = matrix[i][j][m]
-                    # some balls share more than one cell
-                    if (k1, k2) in already_checked:
-                        continue
-                    already_checked.add((k1, k2))
-                    if overlaps(balls[k1], balls[k2]):
-                        if str(type(balls[k2])) != "<class 'mouse.Mouse'>" and\
+    # sweep kdtree cells
+    for cell in kdtree_cells:
+        for i, n in enumerate(cell):
+            k1 = n
+            for m in range(i+1, len(cell)):
+                k2 = cell[m]
+                if (k1, k2) in already_checked:
+                    continue
+                already_checked.add((k1, k2))
+                if overlaps(balls[k1], balls[k2]):
+                    if str(type(balls[k2])) != "<class 'mouse.Mouse'>" and\
                             str(type(balls[k1])) != "<class 'mouse.Mouse'>":
-                            bounce_velocities(balls[k1], balls[k2], game)
-                        elif balls[k2].mode == "select":
-                            wbf.preselected.add(k1)
+                        bounce_velocities(balls[k1], balls[k2], game)
+                    elif balls[k2].mode == "select":
+                        wbf.preselected.add(k1)
 
-                        # if k1 is already grabed or no ball is grabed
-                        elif k1 == wbf.ball_grabed or not wbf.ball_grabed:
-                            wbf.ball_grabed = k1
-                            grab(balls[k1], balls[k2])
+                    # if k1 is already grabed or no ball is grabed
+                    elif k1 == wbf.ball_grabed or not wbf.ball_grabed:
+                        wbf.ball_grabed = k1
+                        grab(balls[k1], balls[k2])
 
-                if i == 0 or i == 7 or j == 0 or j == 7:
-                    wall_bounce(balls[k1], game)
+            wall_bounce(balls[k1], game)
 
 
 def overlaps(ball1, ball2) -> bool:
