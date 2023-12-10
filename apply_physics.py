@@ -122,7 +122,7 @@ def attraction(ball,game) -> np.array:
 def mass_center(balls):
     """calculate mass center"""
 
-    count_mass_center = np.float64(0)
+    count_mass_center = np.array((0, 0), dtype=np.float64)
     total_mass = np.float64(0)
     for ball in balls.values():
         if str(type(ball)) != "<class 'mouse.Mouse'>":
