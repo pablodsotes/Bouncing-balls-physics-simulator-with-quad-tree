@@ -48,7 +48,7 @@ class Node:
 
         for i in range(4):
             # if cell is short or prof is big don't divide again
-            if len(self.cells[i]) in range(1, 10) or self.depth > 7:
+            if len(self.cells[i]) in range(1, 5) or self.depth > 7:
                 # save cell as it is
                 groups.append(self.cells[i])
                 continue
