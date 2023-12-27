@@ -18,5 +18,6 @@ By Pablo Daniel Sotes, Bs.As. Argentina
 
 https://github.com/pablodsotes/Bouncing-balls-physics-simulator-with-quad-tree/assets/147117772/a4083d29-a26c-4fea-9fef-152aae938235
 
-https://github.com/pablodsotes/Bouncing-balls-physics-simulator-with-quad-tree/assets/147117772/9a3a4f4d-7983-49f6-b75d-109a657c2399
+https://github.com/pablodsotes/Bouncing-balls-physics-simulator-with-quad-tree/assets/147117772/ca30ac54-8d7b-4655-b029-cff00e2614df
+
 
