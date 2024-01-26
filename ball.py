@@ -3,6 +3,7 @@
 # pylint: disable=E0203
 
 import time
+import random
 import pygame
 import numpy as np
 
@@ -19,8 +20,9 @@ class Ball():
         self.color = pygame.Color(255,0,0,255)
         if self.mode == "key":
             self.radius = 5
-            self.p = np.array((30,30), dtype=np.float64)
-            self.v = np.array((100,100), dtype=np.float64)
+            self.p = np.array(
+                (50+50*random.random(), 50+50*random.random()), dtype=np.float64)
+            self.v = np.array((30, 30), dtype=np.float64)
         else:
             self.radius = 30 * (time.perf_counter() - kwargs.get("mst"))
             self.p = np.array(pygame.mouse.get_pos(), dtype=np.float64)
