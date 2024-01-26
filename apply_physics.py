@@ -11,7 +11,7 @@ def bounce_velocities(ball1, ball2, game):
     p2 = ball2.p
     if np.array_equal(p2, p1):
         # move to avoid zero division
-        p2 = p2 + (0, 1)
+        p2 = p2 + (1, -1)
     m1 = ball1.mass
     m2 = ball2.mass
     if ball1.grabed:  # to simulate it's fixed
@@ -101,6 +101,8 @@ def attraction(ball,game) -> np.array:
                 p2 = balls[n].p
 
                 # attraction versor
+                if np.array_equal(p2, p1):
+                    p2 += (balls[n].radius+ball.radius, 0)
                 va = (p2 - p1) / np.linalg.norm(p2 - p1)
                 # Newton gravitation law
                 att += game.settings.attraction_k * np.array(
