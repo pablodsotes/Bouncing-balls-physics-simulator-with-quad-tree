@@ -1,4 +1,4 @@
-"""Fill and sweep the grid seaching for collitions , mouse grab, or selection"""
+"""Fill and sweep the grid, seaching for collitions , mouse grab, or selection"""
 
 import numpy as np
 from apply_physics import wall_bounce, grab, bounce_velocities
@@ -48,7 +48,7 @@ class Node:
 
         for i in range(4):
             # if cell is short or prof is big don't divide again
-            if len(self.cells[i]) in range(1, 5) or self.depth > 7:
+            if len(self.cells[i]) in range(1, 5) or self.depth > 5:
                 # save cell as it is
                 groups.append(self.cells[i])
                 continue
@@ -113,7 +113,6 @@ def sweep_kdtree(kdtree_cells, balls, game, wbf):
                         bounce_velocities(balls[k1], balls[k2], game)
                     elif balls[k2].mode == "select":
                         wbf.preselected.add(k1)
-
                     # if k1 is already grabed or no ball is grabed
                     elif k1 == wbf.ball_grabed or not wbf.ball_grabed:
                         wbf.ball_grabed = k1
