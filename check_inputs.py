@@ -84,9 +84,7 @@ class ChIn:
             else:
                 self.actions("delete_selected")
 
-
-
-    def create_object(self,mode):
+    def create_object(self, mode: str):
         """create objets according to event"""
 
         game= self.game
@@ -129,8 +127,7 @@ class ChIn:
                     game.balls_dict[game.ball_count] = obj
 
 
-
-    def actions(self,action):
+    def actions(self, action: str):
         """do actions according to event"""
         game= self.game
 
@@ -140,12 +137,9 @@ class ChIn:
                 game.wbf.select_flag= not game.wbf.select_flag
                 game.balls_dict.pop(0)
                 for key in game.wbf.preselected:
-                    if game.balls_dict[key].selected:
-                        game.balls_dict[key].selected = False
-                        game.balls_dict[key].color =pygame.Color((255,0,0,255))
-                    else:
-                        game.balls_dict[key].selected = True
-                        game.balls_dict[key].color =pygame.Color((70,70,70,255))
+                    game.balls_dict[key].selected = True
+                    game.balls_dict[key].color = pygame.Color(
+                        (70, 70, 70, 255))
             case "deselect":
                 for key in game.balls_dict.copy().keys():
                     if not key == 0:
