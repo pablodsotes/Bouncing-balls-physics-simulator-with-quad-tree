@@ -6,6 +6,7 @@ import time
 import random
 import pygame
 import numpy as np
+V = pygame.math.Vector2
 
 
 class Ball():
@@ -20,25 +21,26 @@ class Ball():
         self.color = pygame.Color(255,0,0,255)
         if self.mode == "key":
             self.radius = 5
-            self.p = np.array(
-                (50+50*random.random(), 50+50*random.random()), dtype=np.float64)
-            self.v = np.array((30, 30), dtype=np.float64)
+            self.p = V(
+                50+50*random.random(), 50+50*random.random())
+            self.v = V(30, 30)
         else:
             self.radius = 30 * (time.perf_counter() - kwargs.get("mst"))
-            self.p = np.array(pygame.mouse.get_pos(), dtype=np.float64)
-            self.v = np.array(pygame.mouse.get_pos()) - np.array(kwargs.get("msp"),dtype=np.float64)
+            self.p = V(pygame.mouse.get_pos())
+            self.v = V(pygame.mouse.get_pos()) - V(kwargs.get("msp"))
         self.trace_p = [int(self.p[0]),int(self.p[1])]
-        self.mass = np.float64(3 * (self.radius**2))
+        self.mass = (3 * (self.radius**2))
         self.rect = pygame.Rect((0, 0, 2 * self.radius, 2 * self.radius))
         self.rect.center = self.p
-        self.att = np.array((0,0),dtype=np.float64)
+        self.att = V((0, 0))
 
     def draw(self):
         """draw ball"""
 
         # pylint: disable=E1101
         if not self.selected:
-            self.color.hsva = (min(0.3 * np.linalg.norm(self.v),270),100,100,100)
+            self.color.hsva = (
+                min(0.3 * (self.v).magnitude(), 270), 100, 100, 100)
         pygame.draw.circle( self.game.screen.image,(self.color),(self.p),self.radius)
 
 
@@ -60,7 +62,7 @@ class Ball():
                 (255, 255, 255, 255),
                 (p),
                 ((p[0] + 17 * w[0], p[1] + 17 * w[1])),
-                max(abs(int(np.linalg.norm(w))),1),
+                max(abs(int((w).magnitude())), 1),
             )
             
     def update(self,wbf):
@@ -80,8 +82,8 @@ class Ball():
     def update_acceleration(self,game,wbf):
         """update v and p because of acceleration"""
         # atraction + gravity
-        a= np.array((0,0),dtype=np.float64)
+        a = V((0, 0))
         a[1] = wbf.gravity_flag * game.settings.G + wbf.attraction_flag * self.att[1]
         a[0] = wbf.attraction_flag * self.att[0]
         self.p += (0.5 * a * (wbf.dt**2))
-        self.v += a * wbf.dt
+        self.v = self.v + wbf.dt*a

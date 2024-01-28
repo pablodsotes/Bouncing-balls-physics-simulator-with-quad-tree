@@ -13,7 +13,6 @@ a : toggle attraction
 t : toggle ball traces
 By Pablo Daniel Sotes pablodsotes@yahoo.com.ar"""
 
-import numpy as np
 import pygame
 from check_inputs import ChIn
 from draw_on_screen import Screen
@@ -55,8 +54,8 @@ class Settings:
         self.screen_height = 800
         self.background_color = (100, 100, 100, 255)
         self.color = (255, 0, 0, 0)
-        self.G = np.float64(200)
-        self.attraction_k = np.float64(100)
+        self.G = 200.0
+        self.attraction_k = 100.0
 
 
 if __name__ == "__main__":

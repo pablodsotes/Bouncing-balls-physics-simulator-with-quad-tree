@@ -1,7 +1,9 @@
 """calculate new velocities after collition and avoid overlaps"""
 import time
-import numpy as np
+import math
 import pygame
+V = pygame.math.Vector2
+
 
 
 def bounce_velocities(ball1, ball2, game):
@@ -9,7 +11,7 @@ def bounce_velocities(ball1, ball2, game):
 
     p1 = ball1.p
     p2 = ball2.p
-    if np.array_equal(p2, p1):
+    if p2 == p1:
         # move to avoid zero division
         p2 = p2 + (1, -1)
     m1 = ball1.mass
@@ -19,16 +21,16 @@ def bounce_velocities(ball1, ball2, game):
     if ball2.grabed:
         m2 = 1000000000
     # versor collition
-    vc = np.array((p2 - p1) / np.linalg.norm(p2 - p1), dtype=np.float64)
+    vc = V(V(p2 - p1)).normalize()
     # versor perpendicular
-    vp = np.array([vc[1], -vc[0]], dtype=np.float64)
+    vp = vc.rotate(90)
 
     # perpendicular components of v
-    v1c = (np.dot(ball1.v, vc)) * vc
-    v2c = (np.dot(ball2.v, vc)) * vc
+    v1c = (ball1.v).project(vc)
+    v2c = (ball2.v).project(vc)
     # parallel components of v
-    v1p = (np.dot(ball1.v, vp)) * vp
-    v2p = (np.dot(ball2.v, vp)) * vp
+    v1p = (ball1.v).project(vp)
+    v2p = (ball2.v).project(vp)
     # elastic bounce equations
     v1 = v1p + ((m1 - m2) / (m1 + m2)) * v1c + \
         (2 * m2 / (m1 + m2)) * v2c  # new veloc
@@ -42,7 +44,7 @@ def bounce_velocities(ball1, ball2, game):
     if not ball2.grabed:
         ball2.v = k * v2
 
-    overlap = abs(np.linalg.norm(ball2.p - ball1.p) -
+    overlap = abs((ball2.p - ball1.p).length() -
                   (ball1.radius + ball2.radius))
     # move away balls
     if not ball1.grabed:
@@ -72,23 +74,23 @@ def grab(ball1, mouse):
 
     ball1.grabed = True
     d = mouse.p - ball1.p
-    mouse.p = np.array(pygame.mouse.get_pos(), dtype=np.float64)
-    ball1.p = np.array(pygame.mouse.get_pos(), dtype=np.float64) - d
+    mouse.p = V(pygame.mouse.get_pos())
+    ball1.p = V(pygame.mouse.get_pos()) - d
     mouse.rect.center = mouse.p
     ball1.rect.center = ball1.p
     # move ball with the mouse
     if (time.perf_counter() - mouse.time) > 0.1:
         rel = pygame.mouse.get_rel()
         mouse.v = (1/(time.perf_counter() - mouse.time)) * \
-            np.array((rel), dtype=np.float64)
+            V((rel))
         mouse.time = time.perf_counter()
         ball1.v = mouse.v
 
 
-def attraction(ball,game) -> np.array:
+def attraction(ball,game):
     """calculate attraction generated for the other balls"""
 
-    att = np.array([0, 0], dtype=np.float64)
+    att = V(0, 0)
 
     balls = ball.game.balls_dict
     game = ball.game
@@ -101,29 +103,26 @@ def attraction(ball,game) -> np.array:
                 p2 = balls[n].p
 
                 # attraction versor
-                if np.array_equal(p2, p1):
+                if p2 == p1:
                     p2 += (balls[n].radius+ball.radius, 0)
-                va = (p2 - p1) / np.linalg.norm(p2 - p1)
+                va = (p2 - p1).normalize()
                 # Newton gravitation law
-                att += game.settings.attraction_k * np.array(
-                    ((balls[n].mass) / (np.linalg.norm(p2 - p1)) ** 2) * va,
-                    dtype=np.float64,
-                )
+                att += game.settings.attraction_k * (
+                    ((balls[n].mass) / (p2 - p1).length_squared())) * va
 
                 # start velocity to achive balls orbite
             if ball.mode == "orbite" and (att[0] != 0 or att[1] != 0):
                 # v = sqrt(a*r)*(perpendicular to 'a' versor)
-                ball.v = np.array(np.sqrt(np.linalg.norm(att) *\
-                np.linalg.norm(game.wbf.mass_center - ball.p))) *\
-                (att[1], -att[0])/np.linalg.norm(att)
+                ball.v = math.sqrt((att).magnitude(
+                ) * (game.wbf.mass_center - ball.p).length()) * (att.normalize()).rotate(90)
                 ball.mode = None
     return att
 
 def mass_center(balls):
     """calculate mass center"""
 
-    count_mass_center = np.array((0, 0), dtype=np.float64)
-    total_mass = np.float64(0)
+    count_mass_center = V((0, 0))
+    total_mass = 0
     for ball in balls.values():
         if str(type(ball)) != "<class 'mouse.Mouse'>":
             total_mass += ball.mass

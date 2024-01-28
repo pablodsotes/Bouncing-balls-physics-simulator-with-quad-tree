@@ -1,0 +1,12 @@
+*.pyc
+bouncing_balls.spec
+build/bouncing_balls/Analysis-00.toc
+build/bouncing_balls/base_library.zip
+build/bouncing_balls/bouncing_balls.pkg
+build/bouncing_balls/EXE-00.toc
+build/bouncing_balls/PKG-00.toc
+build/bouncing_balls/PYZ-00.pyz
+build/bouncing_balls/PYZ-00.toc
+build/bouncing_balls/warn-bouncing_balls.txt
+build/bouncing_balls/xref-bouncing_balls.html
+dist/bouncing_balls.exe

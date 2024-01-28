@@ -1,9 +1,9 @@
 """A ball that its been throwed"""
 
 import time
-import numpy as np
 
 import pygame
+V = pygame.math.Vector2
 
 
 class ShowingBall():
@@ -14,14 +14,14 @@ class ShowingBall():
         self.msp = kwargs.get("msp")
         self.game = game
         self.color = pygame.Color(255, 0, 0, 255)
-        self.v = np.array((0, 0))
+        self.v = V((0, 0))
 
     def draw(self, game):
         """draw showing ball"""
 
-        self.v = np.array(pygame.mouse.get_pos()) - np.array(self.msp)
+        self.v = V(pygame.mouse.get_pos()) - V(self.msp)
         game.showing_ball.color.hsva = (
-            min(0.3 * np.linalg.norm(game.showing_ball.v), 270), 100, 100, 100)
+            min(0.3 * (game.showing_ball.v).magnitude(), 270), 100, 100, 100)
         radius = 30 * (time.perf_counter() - self.mst)
         r = radius
         p = pygame.mouse.get_pos()
@@ -42,5 +42,5 @@ class ShowingBall():
             (255, 255, 255, 255),
             (p),
             ((p[0] + 17 * w[0], p[1] + 17 * w[1])),
-            int(np.linalg.norm(w)),
+            int((w).magnitude()),
         )

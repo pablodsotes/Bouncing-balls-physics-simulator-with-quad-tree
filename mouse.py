@@ -2,18 +2,18 @@
 
 import time
 import pygame
-import numpy as np
+V = pygame.math.Vector2
 
 
 class Mouse():
     """an object that represent mouse grabing or selection frame"""
 
     def __init__(self, game, **kwargs):
-        self.p = np.array(pygame.mouse.get_pos(), dtype=np.float64)
+        self.p = V(pygame.mouse.get_pos())
         self.radius = 1
         self.rect = pygame.Rect(self.p[0], self.p[1], 1, 1)
         self.rect.center = self.p
-        self.v = np.array((0, 0), dtype=np.float64)
+        self.v = V((0, 0))
         self.msp = self.p
         self.mode = kwargs.get("mode")
         self.game = game

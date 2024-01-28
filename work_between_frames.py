@@ -1,9 +1,10 @@
 """do the physics between the frames"""
 
 import time
-import numpy as np
+import pygame
 from searching_for_overlaps import sweep_kdtree, fill_kdtree
 from apply_physics import attraction, mass_center
+V = pygame.math.Vector2
 
 
 class Wbf:
@@ -13,7 +14,7 @@ class Wbf:
         self.dt = time.perf_counter()
         self.preselected = set()
         self.grabed = None
-        self.mass_center =np.array((0,0),dtype=np.float64)
+        self.mass_center = V((0, 0))
         self.attraction_flag = False
         self.gravity_flag = False
         self.grab_flag = False
@@ -51,7 +52,8 @@ class Wbf:
             self.store_grid_flag = False
             sweep_kdtree(kdtree_cells, balls, game, self)
             # update attraction of each ball
-            self.mass_center = mass_center(balls)
+            if len(game.balls_dict) > 0:
+                self.mass_center = mass_center(balls)
             if self.attraction_flag:
                 for ball in balls.values():
                     if str(type(ball)) != "<class 'mouse.Mouse'>":

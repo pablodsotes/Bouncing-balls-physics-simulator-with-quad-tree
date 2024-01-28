@@ -1,6 +1,5 @@
 """Fill and sweep the grid, seaching for collitions , mouse grab, or selection"""
 
-import numpy as np
 from apply_physics import wall_bounce, grab, bounce_velocities
 
 
@@ -133,6 +132,6 @@ def overlaps(ball1, ball2) -> bool:
             if ball2.mode == "select":
                 return True
             # checking if actualy touching or overlap
-            if np.linalg.norm(ball2.p - ball1.p) <= (ball1.radius + ball2.radius):
+            if (ball2.p - ball1.p).length() <= (ball1.radius + ball2.radius):
                 return True
     return False
